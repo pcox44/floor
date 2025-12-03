@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Floor Quotient Scatter - Even/Odd</title>
+<style>
+  html, body { margin:0; background:#111; color:white; font-family:sans-serif; }
+  #ui {
+    position:fixed; top:10px; left:10px;
+    background:rgba(0,0,0,0.65); padding:10px 15px; border-radius:8px; z-index:10;
+  }
+  button { margin:3px; padding:6px 10px; background:#444; border:none; color:white; border-radius:4px; cursor:pointer; font-weight:bold; }
+  button:hover { background:#666; }
+  #info { margin-top:5px; font-size:14px; }
+  canvas { display:block; margin-top:10px; background:#222; border-radius:6px; }
+</style>
+</head>
+<body>
+<div id="ui">
+  <div id="title">🔢 Floor Quotient Scatter Plot (Even/Odd)</div>
+  <button data-count="1">1 Sample</button>
+  <button data-count="10">10 Samples</button>
+  <button data-count="50">50 Samples</button>
+  <button data-count="100">100 Samples</button>
+  <button data-count="10000">10,000 Samples</button>
+  <button id="reset">Reset</button>
+  <div id="info"></div>
+</div>
+
+<canvas id="scatterCanvas"></canvas>
+
+<script>
+const canvas=document.getElementById('scatterCanvas');
+const ctx=canvas.getContext('2d');
+
+function resizeCanvas(){
+  const size=Math.min(window.innerWidth-40, window.innerHeight-40);
+  canvas.width=size;
+  canvas.height=size;
+  redraw();
+}
+window.addEventListener('resize', resizeCanvas);
+
+let points=[];
+
+function floorQuotient(){
+  let x=Math.random();
+  let y=Math.random();
+  if(y===0) y=1e-10; // avoid div0
+  return Math.floor(x/y);
+}
+
+function addSamples(n){
+  for(let i=0;i<n;i++){
+    let x=Math.random(), y=Math.random();
+    let f=Math.floor(x/y);
+    points.push({x,y,f});
+  }
+  updateInfo();
+  redraw();
+}
+
+function updateInfo(){
+  let sum=0, evens=0, odds=0;
+  points.forEach(p=>{
+    sum+=p.f;
+    if(p.f%2===0) evens++; else odds++;
+  });
+  const total=points.length;
+  const avg=total? (sum/total).toFixed(2):0;
+  const evensPct=total? ((evens/total)*100).toFixed(1):0;
+  const oddsPct=total? ((odds/total)*100).toFixed(1):0;
+  document.getElementById('info').innerHTML=
+    `Total samples: ${total}<br>`+
+    `Expected floor(x/y): ${avg}<br>`+
+    `Even: ${evensPct}% | Odd: ${oddsPct}%`;
+}
+
+function redraw(){
+  if(!points) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  points.forEach(p=>{
+    ctx.fillStyle=(p.f%2===0) ? "#49f" : "#ffa500"; // blue for even, orange for odd
+    ctx.beginPath();
+    ctx.arc(p.x*canvas.width, canvas.height - p.y*canvas.height, 3, 0, Math.PI*2);
+    ctx.fill();
+  });
+}
+
+document.querySelectorAll('button[data-count]').forEach(b=>{
+  b.onclick=()=>addSamples(parseInt(b.dataset.count));
+});
+document.getElementById('reset').onclick=()=>{ points=[]; updateInfo(); redraw(); };
+
+resizeCanvas();
+</script>
+</body>
+</html>
