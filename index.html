@@ -1,98 +1,656 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Floor Quotient Scatter - Even/Odd</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floor Quotient Scatter — Even/Odd</title>
 <style>
-  html, body { margin:0; background:#111; color:white; font-family:sans-serif; }
-  #ui {
-    position:fixed; top:10px; left:10px;
-    background:rgba(0,0,0,0.65); padding:10px 15px; border-radius:8px; z-index:10;
+:root {
+  --bg0: #060816;
+  --bg1: #10182f;
+  --panel: rgba(12, 18, 36, 0.78);
+  --panel-strong: rgba(12, 18, 36, 0.94);
+  --border: rgba(255,255,255,0.16);
+  --text: #f8fafc;
+  --muted: #aeb8cc;
+  --blue: #48a3ff;
+  --orange: #ffb02e;
+  --green: #34d399;
+  --red: #fb7185;
+  --shadow: rgba(0,0,0,0.38);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(72,163,255,0.22), transparent 32%),
+    radial-gradient(circle at 80% 20%, rgba(255,176,46,0.14), transparent 30%),
+    radial-gradient(circle at 50% 95%, rgba(52,211,153,0.10), transparent 38%),
+    linear-gradient(135deg, var(--bg0), var(--bg1));
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at center, black, transparent 82%);
+  pointer-events: none;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(310px, 390px) 1fr;
+  gap: 18px;
+  padding: 18px;
+}
+
+#ui {
+  position: relative;
+  z-index: 10;
+  align-self: start;
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 24px 60px var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(72,163,255,0.95), rgba(255,176,46,0.95));
+  color: #06101f;
+  font-weight: 950;
+  font-size: 1.45rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+}
+
+#title {
+  font-size: clamp(1.35rem, 2.2vw, 2.05rem);
+  line-height: 1.02;
+  font-weight: 950;
+  letter-spacing: -0.055em;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.38;
+  margin: 0 0 16px;
+}
+
+.section-title {
+  margin: 18px 0 9px;
+  color: #dbeafe;
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+button {
+  appearance: none;
+  border: 1px solid rgba(255,255,255,0.17);
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 4px 0 rgba(0,0,0,0.22);
+  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.28);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 rgba(0,0,0,0.22);
+}
+
+button.primary {
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+}
+
+button.orange {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+}
+
+button.danger {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+}
+
+button.green {
+  background: linear-gradient(135deg, #10b981, #047857);
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin: 10px 0;
+}
+
+label {
+  color: #e2e8f0;
+  font-size: 0.92rem;
+  font-weight: 850;
+}
+
+.value-pill {
+  min-width: 54px;
+  padding: 4px 8px;
+  text-align: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  color: #f8fafc;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--blue);
+}
+
+.toggle-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.toggle-row button.active {
+  background: linear-gradient(135deg, #334155, #111827);
+  outline: 2px solid rgba(255,255,255,0.26);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.stat {
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.11);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.07);
+}
+
+.stat .label {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.stat .value {
+  margin-top: 4px;
+  font-size: 1.25rem;
+  font-weight: 950;
+}
+
+.legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  font-size: 0.82rem;
+  color: #dbeafe;
+  font-weight: 850;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.swatch.blue { background: var(--blue); color: var(--blue); }
+.swatch.orange { background: var(--orange); color: var(--orange); }
+
+.explain {
+  margin-top: 14px;
+  padding: 12px;
+  border-left: 4px solid var(--green);
+  border-radius: 12px;
+  background: rgba(52,211,153,0.08);
+  color: #d1fae5;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.stage {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+}
+
+.canvas-shell {
+  position: relative;
+  width: min(calc(100vh - 36px), calc(100vw - 430px));
+  height: min(calc(100vh - 36px), calc(100vw - 430px));
+  min-width: 360px;
+  min-height: 360px;
+  border-radius: 28px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: 0 28px 80px rgba(0,0,0,0.40);
+  padding: 14px;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 20px;
+  background: #050816;
+}
+
+.axis-label {
+  position: absolute;
+  color: rgba(255,255,255,0.62);
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.x-label { left: 50%; bottom: 22px; transform: translateX(-50%); }
+.y-label { left: 22px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: center; }
+
+.corner-note {
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.75);
+  background: rgba(0,0,0,0.35);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  html, body { overflow: auto; }
+  .app {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
   }
-  button { margin:3px; padding:6px 10px; background:#444; border:none; color:white; border-radius:4px; cursor:pointer; font-weight:bold; }
-  button:hover { background:#666; }
-  #info { margin-top:5px; font-size:14px; }
-  canvas { display:block; margin-top:10px; background:#222; border-radius:6px; }
+  #ui { max-height: none; }
+  .canvas-shell {
+    width: min(94vw, 720px);
+    height: min(94vw, 720px);
+    min-width: 0;
+    min-height: 0;
+  }
+}
 </style>
 </head>
 <body>
-<div id="ui">
-  <div id="title">🔢 Floor Quotient Scatter Plot (Even/Odd)</div>
-  <button data-count="1">1 Sample</button>
-  <button data-count="10">10 Samples</button>
-  <button data-count="50">50 Samples</button>
-  <button data-count="100">100 Samples</button>
-  <button data-count="10000">10,000 Samples</button>
-  <button id="reset">Reset</button>
-  <div id="info"></div>
+<div class="app">
+  <aside id="ui">
+    <div class="brand">
+      <div class="logo">⌊÷⌋</div>
+      <div id="title">Floor Quotient Scatter</div>
+    </div>
+    <p class="subtitle">
+      Pick random points \((x,y)\) in the unit square and color each point by whether \(\left\lfloor x/y \right\rfloor\) is even or odd.
+    </p>
+
+    <div class="section-title">Add Samples</div>
+    <div class="button-grid">
+      <button data-count="1">1 Sample</button>
+      <button data-count="10">10 Samples</button>
+      <button data-count="50">50 Samples</button>
+      <button data-count="100">100 Samples</button>
+      <button data-count="1000" class="primary">1,000 Samples</button>
+      <button data-count="10000" class="orange">10,000 Samples</button>
+    </div>
+
+    <div class="section-title">Actions</div>
+    <div class="button-grid">
+      <button id="animate" class="green">Auto Run</button>
+      <button id="save">Save PNG</button>
+      <button id="reset" class="danger">Reset</button>
+      <button id="fullscreen">Fullscreen</button>
+    </div>
+
+    <div class="section-title">Display</div>
+    <div class="control-row">
+      <label for="pointSize">Point Size</label>
+      <span class="value-pill" id="pointSizeVal">3</span>
+    </div>
+    <input type="range" id="pointSize" min="1" max="8" step="0.5" value="3">
+
+    <div class="control-row">
+      <label for="opacity">Opacity</label>
+      <span class="value-pill" id="opacityVal">0.78</span>
+    </div>
+    <input type="range" id="opacity" min="0.1" max="1" step="0.01" value="0.78">
+
+    <div class="control-row">
+      <label for="glow">Glow</label>
+      <span class="value-pill" id="glowVal">8</span>
+    </div>
+    <input type="range" id="glow" min="0" max="20" step="1" value="8">
+
+    <div class="section-title">Color Mode</div>
+    <div class="toggle-row">
+      <button id="modeParity" class="active">Even/Odd</button>
+      <button id="modeValue">By Value</button>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="swatch blue"></span>Even floor</span>
+      <span class="legend-item"><span class="swatch orange"></span>Odd floor</span>
+    </div>
+
+    <div class="section-title">Stats</div>
+    <div class="stats-grid" id="info"></div>
+
+    <div class="explain">
+      The banded curves appear because \(\lfloor x/y\rfloor=k\) means
+      \(k \le x/y < k+1\), or \(ky \le x < (k+1)y\).
+    </div>
+  </aside>
+
+  <main class="stage">
+    <div class="canvas-shell">
+      <canvas id="scatterCanvas"></canvas>
+      <div class="axis-label x-label">x</div>
+      <div class="axis-label y-label">y</div>
+      <div class="corner-note">Unit Square</div>
+    </div>
+  </main>
 </div>
 
-<canvas id="scatterCanvas"></canvas>
-
 <script>
-const canvas=document.getElementById('scatterCanvas');
-const ctx=canvas.getContext('2d');
+const canvas = document.getElementById('scatterCanvas');
+const ctx = canvas.getContext('2d');
+const info = document.getElementById('info');
+const pointSizeSlider = document.getElementById('pointSize');
+const opacitySlider = document.getElementById('opacity');
+const glowSlider = document.getElementById('glow');
+const pointSizeVal = document.getElementById('pointSizeVal');
+const opacityVal = document.getElementById('opacityVal');
+const glowVal = document.getElementById('glowVal');
+const animateBtn = document.getElementById('animate');
+const modeParityBtn = document.getElementById('modeParity');
+const modeValueBtn = document.getElementById('modeValue');
 
-function resizeCanvas(){
-  const size=Math.min(window.innerWidth-40, window.innerHeight-40);
-  canvas.width=size;
-  canvas.height=size;
+let points = [];
+let autoRunning = false;
+let colorMode = 'parity';
+let animationFrame = null;
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   redraw();
 }
 window.addEventListener('resize', resizeCanvas);
 
-let points=[];
-
-function floorQuotient(){
-  let x=Math.random();
-  let y=Math.random();
-  if(y===0) y=1e-10; // avoid div0
-  return Math.floor(x/y);
-}
-
-function addSamples(n){
-  for(let i=0;i<n;i++){
-    let x=Math.random(), y=Math.random();
-    let f=Math.floor(x/y);
-    points.push({x,y,f});
+function addSamples(n) {
+  for (let i = 0; i < n; i++) {
+    const x = Math.random();
+    const y = Math.max(Math.random(), Number.EPSILON);
+    const f = Math.floor(x / y);
+    points.push({ x, y, f });
   }
   updateInfo();
   redraw();
 }
 
-function updateInfo(){
-  let sum=0, evens=0, odds=0;
-  points.forEach(p=>{
-    sum+=p.f;
-    if(p.f%2===0) evens++; else odds++;
+function updateInfo() {
+  let sum = 0;
+  let evens = 0;
+  let odds = 0;
+  let maxF = 0;
+
+  points.forEach(p => {
+    sum += p.f;
+    maxF = Math.max(maxF, p.f);
+    if (p.f % 2 === 0) evens++;
+    else odds++;
   });
-  const total=points.length;
-  const avg=total? (sum/total).toFixed(2):0;
-  const evensPct=total? ((evens/total)*100).toFixed(1):0;
-  const oddsPct=total? ((odds/total)*100).toFixed(1):0;
-  document.getElementById('info').innerHTML=
-    `Total samples: ${total}<br>`+
-    `Expected floor(x/y): ${avg}<br>`+
-    `Even: ${evensPct}% | Odd: ${oddsPct}%`;
+
+  const total = points.length;
+  const avg = total ? sum / total : 0;
+  const evensPct = total ? (evens / total) * 100 : 0;
+  const oddsPct = total ? (odds / total) * 100 : 0;
+
+  info.innerHTML = `
+    <div class="stat"><div class="label">Samples</div><div class="value">${total.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Average floor</div><div class="value">${avg.toFixed(2)}</div></div>
+    <div class="stat"><div class="label">Even</div><div class="value">${evensPct.toFixed(1)}%</div></div>
+    <div class="stat"><div class="label">Odd</div><div class="value">${oddsPct.toFixed(1)}%</div></div>
+    <div class="stat"><div class="label">Max floor</div><div class="value">${maxF.toLocaleString()}</div></div>
+    <div class="stat"><div class="label">Blue/Orange</div><div class="value">${evens}:${odds}</div></div>
+  `;
 }
 
-function redraw(){
-  if(!points) return;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  points.forEach(p=>{
-    ctx.fillStyle=(p.f%2===0) ? "#49f" : "#ffa500"; // blue for even, orange for odd
+function clearCanvasBackground(w, h) {
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, '#07101f');
+  grad.addColorStop(1, '#030712');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1;
+  const steps = 10;
+  for (let i = 0; i <= steps; i++) {
+    const x = (i / steps) * w;
+    const y = (i / steps) * h;
     ctx.beginPath();
-    ctx.arc(p.x*canvas.width, canvas.height - p.y*canvas.height, 3, 0, Math.PI*2);
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function pointColor(p, alpha) {
+  if (colorMode === 'value') {
+    const hue = (p.f * 47) % 360;
+    return `hsla(${hue}, 95%, 62%, ${alpha})`;
+  }
+  return p.f % 2 === 0
+    ? `rgba(72, 163, 255, ${alpha})`
+    : `rgba(255, 176, 46, ${alpha})`;
+}
+
+function redraw() {
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  if (!w || !h) return;
+
+  const size = parseFloat(pointSizeSlider.value);
+  const alpha = parseFloat(opacitySlider.value);
+  const glow = parseFloat(glowSlider.value);
+
+  clearCanvasBackground(w, h);
+
+  ctx.save();
+  ctx.shadowBlur = glow;
+  points.forEach(p => {
+    const px = p.x * w;
+    const py = h - p.y * h;
+    const color = pointColor(p, alpha);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.beginPath();
+    ctx.arc(px, py, size, 0, Math.PI * 2);
     ctx.fill();
   });
+  ctx.restore();
+
+  drawAxes(w, h);
 }
 
-document.querySelectorAll('button[data-count]').forEach(b=>{
-  b.onclick=()=>addSamples(parseInt(b.dataset.count));
-});
-document.getElementById('reset').onclick=()=>{ points=[]; updateInfo(); redraw(); };
+function drawAxes(w, h) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+  ctx.fillStyle = 'rgba(255,255,255,0.72)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, h - 1);
+  ctx.lineTo(w, h - 1);
+  ctx.moveTo(1, 0);
+  ctx.lineTo(1, h);
+  ctx.stroke();
 
-resizeCanvas();
+  ctx.font = '900 12px system-ui, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('(0,1)', 8, 8);
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('(0,0)', 8, h - 8);
+  ctx.textAlign = 'right';
+  ctx.fillText('(1,0)', w - 8, h - 8);
+  ctx.restore();
+}
+
+function syncSliders() {
+  pointSizeVal.textContent = pointSizeSlider.value;
+  opacityVal.textContent = Number(opacitySlider.value).toFixed(2);
+  glowVal.textContent = glowSlider.value;
+}
+
+function autoLoop() {
+  if (!autoRunning) return;
+  addSamples(80);
+  animationFrame = requestAnimationFrame(autoLoop);
+}
+
+function toggleAuto() {
+  autoRunning = !autoRunning;
+  animateBtn.textContent = autoRunning ? 'Pause Auto' : 'Auto Run';
+  animateBtn.classList.toggle('danger', autoRunning);
+  animateBtn.classList.toggle('green', !autoRunning);
+  if (autoRunning) autoLoop();
+  else if (animationFrame) cancelAnimationFrame(animationFrame);
+}
+
+document.querySelectorAll('button[data-count]').forEach(button => {
+  button.addEventListener('click', () => addSamples(parseInt(button.dataset.count, 10)));
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  points = [];
+  updateInfo();
+  redraw();
+});
+
+document.getElementById('save').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'floor-quotient-scatter.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('fullscreen').addEventListener('click', () => {
+  document.documentElement.requestFullscreen?.();
+});
+
+animateBtn.addEventListener('click', toggleAuto);
+
+modeParityBtn.addEventListener('click', () => {
+  colorMode = 'parity';
+  modeParityBtn.classList.add('active');
+  modeValueBtn.classList.remove('active');
+  redraw();
+});
+
+modeValueBtn.addEventListener('click', () => {
+  colorMode = 'value';
+  modeValueBtn.classList.add('active');
+  modeParityBtn.classList.remove('active');
+  redraw();
+});
+
+[pointSizeSlider, opacitySlider, glowSlider].forEach(slider => {
+  slider.addEventListener('input', () => {
+    syncSliders();
+    redraw();
+  });
+});
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    toggleAuto();
+  }
+  if (e.key.toLowerCase() === 'r') {
+    points = [];
+    updateInfo();
+    redraw();
+  }
+});
+
+syncSliders();
+updateInfo();
+requestAnimationFrame(resizeCanvas);
 </script>
 </body>
 </html>
